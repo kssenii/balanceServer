@@ -8,18 +8,26 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
 	l := log.New(os.Stdout, "balance-info ", log.LstdFlags)
-	//startupHandler := handlers.Startup(l)
-	shutdownHandler := handlers.Shutdown(l)
 	clientHandler := handlers.NewClient(l)
 
-	serveMux := http.NewServeMux()
-	serveMux.Handle("/", clientHandler)
-	serveMux.Handle("/shutdown", shutdownHandler)
-	serveMux.Handle("/client", clientHandler)
+	serveMux := mux.NewRouter()
+
+	getRouter := serveMux.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/", clientHandler.GetClients)
+
+	putRouter := serveMux.Methods(http.MethodPut).Subrouter()
+	putRouter.HandleFunc("/{id:[0-9]+}", clientHandler.UpdateClientData)
+	putRouter.Use(clientHandler.MiddlewareValidateClient)
+
+	postRouter := serveMux.Methods(http.MethodPost).Subrouter()
+	postRouter.HandleFunc("/", clientHandler.AddClient)
+	postRouter.Use(clientHandler.MiddlewareValidateClient)
 
 	server := &http.Server{
 		Addr:         ":9090",
