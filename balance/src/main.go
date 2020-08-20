@@ -12,12 +12,12 @@ import (
 
 func main() {
 	l := log.New(os.Stdout, "balance-info ", log.LstdFlags)
-	startupHandler := handlers.Startup(l)
+	//startupHandler := handlers.Startup(l)
 	shutdownHandler := handlers.Shutdown(l)
 	clientHandler := handlers.NewClient(l)
 
 	serveMux := http.NewServeMux()
-	serveMux.Handle("/", startupHandler)
+	serveMux.Handle("/", clientHandler)
 	serveMux.Handle("/shutdown", shutdownHandler)
 	serveMux.Handle("/client", clientHandler)
 
