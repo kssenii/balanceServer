@@ -10,23 +10,23 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type Client struct {
+type Request struct {
 	log *log.Logger
 }
 
-func NewClient(l *log.Logger) *Client {
-	return &Client{l}
+func NewRequest(l *log.Logger) *Request {
+	return &Request{l}
 }
 
-func (client *Client) AddClient(rw http.ResponseWriter, r *http.Request) {
+func (request *Request) AddClient(rw http.ResponseWriter, r *http.Request) {
 
-	client.log.Println("Creating a new client")
+	request.log.Println("Creating a new request")
 	newClient := r.Context().Value(KeyClient{}).(*data.Client)
 	data.AddClient(newClient)
 }
 
-func (client *Client) GetClients(rw http.ResponseWriter, r *http.Request) {
-	client.log.Println("Fetching all client's data")
+func (request *Request) GetClients(rw http.ResponseWriter, r *http.Request) {
+	request.log.Println("Fetching all client's data")
 	clientsList := data.GetCLients()
 	err := clientsList.ToJSON(rw)
 	if err != nil {
@@ -34,7 +34,7 @@ func (client *Client) GetClients(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (client *Client) UpdateClientData(rw http.ResponseWriter, r *http.Request) {
+func (request *Request) UpdateClientData(rw http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	id, err := strconv.ParseUint(vars["id"], 10, 64)
@@ -43,7 +43,7 @@ func (client *Client) UpdateClientData(rw http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	client.log.Printf("Creating client with ID %d", id)
+	request.log.Printf("Creating client with ID %d", id)
 
 	currentClient := r.Context().Value(KeyClient{}).(*data.Client)
 
@@ -60,15 +60,23 @@ func (client *Client) UpdateClientData(rw http.ResponseWriter, r *http.Request) 
 
 type KeyClient struct{}
 
-func (client Client) MiddlewareValidateClient(next http.Handler) http.Handler {
+func (request Request) MiddlewareValidateClient(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 
 		currentClient := &data.Client{}
 
 		err := currentClient.FromJSON(r.Body)
 		if err != nil {
-			client.log.Println("[ERROR] deserializing product", err)
+			request.log.Println("[ERROR] deserializing product", err)
 			http.Error(rw, "Unable to unmarshal json", http.StatusBadRequest)
+			return
+		}
+
+		// validate client's data
+		err = currentClient.Validate()
+		if err != nil {
+			request.log.Println("[ERROR] validating parsed data", err)
+			http.Error(rw, "Error validating data", http.StatusBadRequest)
 			return
 		}
 

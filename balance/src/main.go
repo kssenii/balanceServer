@@ -13,8 +13,8 @@ import (
 )
 
 func main() {
-	l := log.New(os.Stdout, "balance-info ", log.LstdFlags)
-	clientHandler := handlers.NewClient(l)
+	clientLogger := log.New(os.Stdout, "ClientLog ", log.LstdFlags)
+	clientHandler := handlers.NewRequest(clientLogger)
 
 	serveMux := mux.NewRouter()
 

@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"io"
 	"time"
+
+	"gopkg.in/go-playground/validator.v9"
 )
 
 type Client struct {
-	ID        uint64 `json:"id"`
-	Balance   uint64 `json:"balance"`
+	ID        uint64 `json:"id" validate:"required"`
+	Balance   uint64 `json:"balance" validate:"gte=0"`
 	CreatedOn string `json:"-"`
 	UpdatedOn string `json:"-"`
 }
@@ -21,9 +23,15 @@ func (clients *Clients) ToJSON(w io.Writer) error {
 	return encoder.Encode(clients)
 }
 
-func (clients *Client) FromJSON(r io.Reader) error {
+func (client *Client) FromJSON(r io.Reader) error {
 	decoder := json.NewDecoder(r)
-	return decoder.Decode(clients)
+	return decoder.Decode(client)
+}
+
+func (client *Client) Validate() error {
+	validate := validator.New()
+	err := validate.Struct(client)
+	return err
 }
 
 func GetCLients() Clients {
