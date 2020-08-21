@@ -8,9 +8,11 @@ import (
 )
 
 type ClientBalanceData struct {
-	ID      uint64 `json:"id" validate:"required"`
-	Balance uint64 `json:"balance" validate:"gte=0"`
-	Sum     uint64 `json:"sum" validate:"gte=0"`
+	ID      uint32 `json:"id"`                                             // client id
+	Balance uint64 `json:"Balance"`                                        // current balance
+	Sum     int32  `json:"sum,omitempty"`                                  // sum to add to current balance
+	ToID    uint32 `json:"toID,omitempty" validate:"required_with=FromID"` // client's id, to whom sum is transfered
+	FromID  uint32 `json:"fromID,omitempty" validate:"required_with=ToID"` // client's id, from whom sum is taken
 }
 
 func (data *ClientBalanceData) ToJSON(w io.Writer) error {
@@ -25,6 +27,5 @@ func (data *ClientBalanceData) FromJSON(r io.Reader) error {
 
 func (data *ClientBalanceData) Validate() error {
 	validate := validator.New()
-	err := validate.Struct(data)
-	return err
+	return validate.Struct(data)
 }

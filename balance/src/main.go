@@ -22,13 +22,13 @@ func main() {
 	getRouter.HandleFunc("/", clientHandler.GetBalance)
 	getRouter.Use(clientHandler.MiddlewareValidateClient)
 
-	putRouter := serveMux.Methods(http.MethodPut).Subrouter()
-	putRouter.HandleFunc("/", clientHandler.UpdateBalance)
-	putRouter.Use(clientHandler.MiddlewareValidateClient)
-
 	postRouter := serveMux.Methods(http.MethodPost).Subrouter()
-	postRouter.HandleFunc("/", clientHandler.AddClient)
+	postRouter.HandleFunc("/", clientHandler.UpdateBalance)
 	postRouter.Use(clientHandler.MiddlewareValidateClient)
+
+	putRouter := serveMux.Methods(http.MethodPut).Subrouter()
+	putRouter.HandleFunc("/", clientHandler.TransferBalance)
+	putRouter.Use(clientHandler.MiddlewareValidateClient)
 
 	serverLogger := log.New(os.Stdout, "ServerLog ", log.LstdFlags)
 	server := &http.Server{

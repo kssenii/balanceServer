@@ -41,17 +41,18 @@ func SetupDB() *DBStorage {
 	}
 }
 
-func (ds *DBStorage) InsertData(id uint64) error {
+func (ds *DBStorage) InsertData(id uint32) error {
 	_, err := ds.db.Exec("INSERT INTO clientBalanceData VALUES ($1, 0)", id)
 	return err
 }
 
-func (ds *DBStorage) UpdateData(id uint64, sum uint64) error {
+func (ds *DBStorage) UpdateData(id uint32, sum uint64) error {
+	ds.log.Printf("[TRACE] Updating balance to %d for client with id %d", sum, id)
 	_, err := ds.db.Exec("UPDATE clientBalanceData SET balance = $2 WHERE id = $1", id, sum)
 	return err
 }
 
-func (ds *DBStorage) SelectData(id uint64) (string, error) {
+func (ds *DBStorage) SelectData(id uint32) (string, error) {
 
 	rows, err := ds.db.Query("SELECT balance FROM clientBalanceData WHERE id = $1", id)
 	if err != nil {
