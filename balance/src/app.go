@@ -13,13 +13,17 @@ import (
 )
 
 func main() {
-	dbHandler := handlers.SetupDB()
-	clientHandler := handlers.NewRequest(dbHandler)
+	dbHandler, err := handlers.SetupDB()
+	if err != nil {
+		log.Fatal("Cannot set up db. Reason: ", err)
+	}
 
+	clientHandler := handlers.NewBalanceRequest(dbHandler)
 	serveMux := mux.NewRouter()
 
 	getRouter := serveMux.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("/", clientHandler.GetBalance)
+	getRouter.HandleFunc("/logs", clientHandler.GetTransactionsLog)
 	getRouter.Use(clientHandler.MiddlewareValidateClient)
 
 	postRouter := serveMux.Methods(http.MethodPost).Subrouter()
