@@ -42,7 +42,7 @@ $ curl localhost:9090 -X PUT -d '{"toID":1, "fromID":2, "sum":1000, "description
 -   Получение списка транзакций с комментариями откуда и зачем были начислены/списаны средства с баланса. Можно указать параметр сортировки: по дате или по сумме. По умолчанию включена сортировка по дате.
 
 ```bash
-$ curl localhost:9090/logs -XGET -d '{"id":1}'
-$ curl localhost:9090/logs -XGET -d '{"id":1, "sort":"sum"}'
-$ curl localhost:9090/logs -XGET -d '{"id":1, "sort":"time"}'
+$ curl localhost:9090/logs -X GET -d '{"id":1}'
+$ curl localhost:9090/logs -X GET -d '{"id":1, "sort":"sum"}'
+$ curl localhost:9090/logs -X GET -d '{"id":1, "sort":"time"}'
 ```

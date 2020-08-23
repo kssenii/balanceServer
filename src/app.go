@@ -57,8 +57,8 @@ func main() {
 	signal.Notify(sigChan, os.Interrupt)
 	signal.Notify(sigChan, os.Kill)
 
-	sig := <-sigChan // Block untill message is available to be consumed
-	serverLogger.Println(" Received terminate, gracefull shutdown", sig)
+	sig := <-sigChan
+	serverLogger.Println("Received terminate, gracefull shutdown", sig)
 
 	timeoutContext, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	server.Shutdown(timeoutContext)
