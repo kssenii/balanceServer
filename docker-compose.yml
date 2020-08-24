@@ -1,6 +1,22 @@
 version: '3'
 
 services:
+  app:
+    build: .
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    depends_on:
+      -  database
+    networks:
+      static-network:
+        ipv4_address: 172.20.0.5
+    environment:
+      DB_HOST: "database"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "postgres"
+      DB_NAME: "balancedb"
 
   database:
     image: postgres:latest
@@ -10,9 +26,16 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: balancedb
-    restart: unless-stopped
     volumes:
       - database-data:/var/lib/postgresql/data/
+    networks:
+      static-network:
+        ipv4_address: 172.20.0.6
 
 volumes:
   database-data:
+networks:
+  static-network:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

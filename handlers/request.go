@@ -234,6 +234,7 @@ func (request *Request) TransferBalance(rw http.ResponseWriter, r *http.Request)
 		}
 
 		NotifyClient(rw, "Unable to update client data", http.StatusInternalServerError)
+		return
 	}
 
 	if data.Description == "" {
@@ -256,6 +257,7 @@ func (request *Request) GetTransactionsLog(rw http.ResponseWriter, r *http.Reque
 	if err != nil {
 		request.log.Printf("[ERROR] SELECT query failed. Reason: %s", err)
 		NotifyClient(rw, "Unable to get balance transactions logs", http.StatusInternalServerError)
+		return
 	}
 
 	// Send json logs to client

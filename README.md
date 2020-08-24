@@ -1,12 +1,12 @@
-## Микросервис для работы с балансом пользователей.
+## Микросервис для работы с балансом пользователей
 
 **Запуск:**
 
 ```bash
-$ git clone https://github.com/kssenii/microservices
-$ cd microservices/balance
+$ git clone https://github.com/kssenii/balanceServer
+$ cd balanceServer
+$ docker-compose build
 $ docker-compose up
-$ go run src/app.go
 ```
 
 **Примеры запросов:**
@@ -14,8 +14,8 @@ $ go run src/app.go
 -   Получение текущего баланса пользователя. Принимает id пользователя. Если параметр `currency` присутствует, то баланс пользователя конвертируется с рубля на указанную валюту.
 
 ```bash
-$ curl localhost:9090 -X GET -d '{"id":1}' 
-$ curl localhost:9090 -X GET -d '{"id":1, "currency":"USD"}' 
+$ curl localhost:9090 -X GET -d '{"id":1}'
+$ curl localhost:9090 -X GET -d '{"id":1, "currency":"USD"}'
 ```
 
 -   Начисление средств на баланс. Принимает id пользователя и сколько средств зачислить. Опциональный параметр `description` - откуда/зачем были зачислены средства (для сохранения данных о переводе, по умолчанию будет записан тип операции).

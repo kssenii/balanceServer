@@ -15,9 +15,6 @@ type DBStorage struct {
 }
 
 const (
-	DB_USER       = "postgres"
-	DB_PASSWORD   = "postgres"
-	DB_NAME       = "balancedb"
 	BALANCE_TABLE = "clientBalanceData"
 	LOG_TABLE     = "clientLogData"
 )
@@ -27,22 +24,24 @@ func SetupDB() (*DBStorage, error) {
 	dbLogger := log.New(os.Stdout, "DBLog ", log.LstdFlags)
 	dbLogger.Println("[TRACE] Setting up database")
 
-	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", DB_USER, DB_PASSWORD, DB_NAME)
+	dbinfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
 	db, err := sql.Open("postgres", dbinfo)
+
 	if err != nil {
 		dbLogger.Println("[ERROR] connecting db", err)
 		return nil, err
 	}
 
-	db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s", BALANCE_TABLE))
-	_, err = db.Exec(fmt.Sprintf("CREATE TABLE %s (id Serial, balance Numeric)", BALANCE_TABLE))
+	_, err = db.Exec(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (id Serial, balance Numeric)", BALANCE_TABLE))
 	if err != nil {
 		dbLogger.Printf("[ERROR] creating table %s. Reason: %s", BALANCE_TABLE, err)
 		return nil, err
 	}
 
-	db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s", LOG_TABLE))
-	_, err = db.Exec(fmt.Sprintf("CREATE TABLE %s (id Serial, sum Numeric, description VARCHAR, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())", LOG_TABLE))
+	_, err = db.Exec(
+		fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (id Serial, sum Numeric, description VARCHAR, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())",
+			LOG_TABLE))
 	if err != nil {
 		dbLogger.Printf("[ERROR] creating table %s. Reason: %s", LOG_TABLE, err)
 		return nil, err
@@ -82,7 +81,8 @@ func (ds *DBStorage) SelectData(data TableData) ([]TableData, error) {
 		if data.Sort == "" || data.Sort == "time" {
 			data.Sort = "created_at"
 		}
-		query = fmt.Sprintf("SELECT id, sum, description, created_at FROM %s WHERE id = %d ORDER BY %s DESC", data.TableName, data.ClientID, data.Sort)
+		query = fmt.Sprintf("SELECT id, sum, description, created_at FROM %s WHERE id = %d ORDER BY %s DESC",
+			data.TableName, data.ClientID, data.Sort)
 	}
 	rows, err := ds.db.Query(query)
 	if err != nil {

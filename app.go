@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"handlers"
+	handlers "handlersModule/handlers"
 	"log"
 	"net/http"
 	"os"
@@ -12,8 +12,24 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	RETRIES_MAX = 5
+)
+
 func main() {
+	cntRetries := 0
 	dbHandler, err := handlers.SetupDB()
+	if err != nil {
+		for {
+			dbHandler, err = handlers.SetupDB()
+			if err != nil && cntRetries != RETRIES_MAX {
+				cntRetries++
+				time.Sleep(time.Second * 5)
+				continue
+			}
+			break
+		}
+	}
 	if err != nil {
 		log.Fatal("Cannot set up db. Reason: ", err)
 	}
