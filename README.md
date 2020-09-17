@@ -3,10 +3,7 @@
 **Запуск:**
 
 ```bash
-$ git clone https://github.com/kssenii/balanceServer
-$ cd balanceServer
-$ docker-compose build
-$ docker-compose up
+$ docker-compose up --build
 ```
 
 **Примеры запросов:**
